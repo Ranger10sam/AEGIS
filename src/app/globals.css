@@ -1,26 +1,246 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: `dark:` variants apply under a `.dark` ancestor.
+   Aegis is dark-first — <html> carries `dark` by default (see layout.tsx). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================================
+   Design tokens (CLAUDE.md §1)
+   Light values on :root, dark overrides on .dark. Components reference the
+   semantic Tailwind names below — never raw hex.
+   ========================================================================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  --bg-base: #fafaf8;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --border: #e4e4e0;
+  --border-strong: #d0d0ca;
+
+  --text-primary: #1a1a1a;
+  --text-secondary: #555560;
+  --text-tertiary: #8a8a92;
+
+  --accent: #a6802e;
+  --accent-soft: #f5efe0;
+  /* On-accent text: fixed near-black for both themes (gold is mid-toned in
+     both, so dark text clears AA on it; defined once here, inherited by .dark). */
+  --accent-contrast: #161310;
+  --success: #3e9960;
+  --warning: #b8852a;
+  --danger: #c04a34;
+  --info: #4a7bc0;
 }
 
+.dark {
+  color-scheme: dark;
+
+  --bg-base: #0e0f11;
+  --bg-surface: #17181b;
+  --bg-elevated: #1f2024;
+  --border: #2a2b30;
+  --border-strong: #3a3b42;
+
+  --text-primary: #ececec;
+  --text-secondary: #a0a0a8;
+  --text-tertiary: #6b6b73;
+
+  --accent: #c8a24b;
+  --accent-soft: #2a2418;
+  --success: #5cb87a;
+  --warning: #d9a441;
+  --danger: #d9614b;
+  --info: #6b9bd9;
+}
+
+/* ============================================================================
+   Tailwind theme — colors + fonts
+   `inline` so utilities reference the runtime CSS vars above and swap with the
+   active theme. Names:
+     surfaces  bg-canvas / bg-surface / bg-elevated  (text-canvas = on-canvas)
+     borders   border-line / border-line-strong
+     text      text-fg / text-muted / text-faint
+     signal    accent, accent-soft, success, warning, danger, info
+   ========================================================================== */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-canvas: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+
+  --color-fg: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-faint: var(--text-tertiary);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, "Times New Roman",
+    serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular",
+    monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ============================================================================
+   Tailwind theme — static tokens (type scale, radius, motion)
+   ========================================================================== */
+@theme {
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.6rem;
+  --text-xl: 1.5rem;
+  --text-xl--line-height: 1.875rem;
+  --text-2xl: 2rem;
+  --text-2xl--line-height: 2.375rem;
+  --text-3xl: 3rem;
+  --text-3xl--line-height: 1;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --animate-fade-in: fade-in 150ms ease-out;
+  --animate-fade-out: fade-out 120ms ease-in;
+  --animate-scale-in: scale-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-scale-out: scale-out 130ms ease-in;
+  --animate-slide-in: slide-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-out: slide-out 160ms ease-in;
+  --animate-tip-in: tip-in 140ms ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -48%) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+  @keyframes scale-out {
+    from {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(-50%, -48%) scale(0.96);
+    }
+  }
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateX(calc(100% + 1.5rem));
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes slide-out {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(calc(100% + 1.5rem));
+    }
+  }
+  @keyframes tip-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================================
+   Base layer
+   ========================================================================== */
+@layer base {
+  *,
+  ::before,
+  ::after,
+  ::backdrop {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--accent) 28%, transparent);
+    color: var(--text-primary);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border-strong);
+    border: 2px solid var(--bg-base);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-tertiary);
+  }
+}
+
+/* Respect reduced-motion globally (CLAUDE.md §1, §18). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
