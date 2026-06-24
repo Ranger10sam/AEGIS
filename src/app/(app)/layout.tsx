@@ -1,24 +1,31 @@
-import { subWeeks } from "date-fns";
+import { redirect } from "next/navigation";
 
 import { BottomNav } from "@/components/shell/bottom-nav";
 import { PhaseBar } from "@/components/shell/phase-bar";
 import { Sidebar } from "@/components/shell/sidebar";
 import { derivePhase } from "@/lib/phase";
+import { getUserConfig } from "@/lib/queries/config";
 
-// INTERIM: the real start_date / duration / goal come from user_config once the
-// data layer lands (build block 4+). Until then we derive the phase from a
-// fixed offset that puts us in Phase 2, so every area of the shell is visible.
-function interimPhase() {
-  const start = subWeeks(new Date(), 5);
-  return derivePhase(start.toISOString(), 16, 45);
-}
+// Per-user, request-time data (config + derived phase) — never prerendered.
+export const dynamic = "force-dynamic";
 
-export default function AppLayout({
+export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const phase = interimPhase();
+  const config = await getUserConfig();
+
+  // No config yet, or not onboarded → send them through onboarding first.
+  if (!config || !config.onboarded) {
+    redirect("/onboarding");
+  }
+
+  const phase = derivePhase(
+    config.start_date,
+    config.duration_weeks,
+    config.daily_minutes_goal,
+  );
 
   return (
     <div className="min-h-dvh">

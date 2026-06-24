@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { isActivePath, MORE_NAV } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
@@ -65,8 +66,9 @@ export function MoreMenu() {
             );
           })}
         </ul>
-        <div className="border-t border-line pt-4">
+        <div className="flex flex-col gap-2 border-t border-line pt-4">
           <ThemeToggle />
+          <SignOutButton />
         </div>
       </DialogContent>
     </Dialog>

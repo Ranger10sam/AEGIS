@@ -1,0 +1,22 @@
+name: Keep Supabase Alive
+
+# Supabase free projects pause after 7 days of no DB activity. This pings the
+# `ping` table every 3 days (CLAUDE.md §16). The daily nudge cron is a natural
+# backstop, but this guarantees liveness even if the app sees no traffic.
+on:
+  schedule:
+    - cron: "0 6 */3 * *" # every 3 days at 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          curl -fsS -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/ping" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{}'

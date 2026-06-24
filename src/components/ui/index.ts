@@ -9,7 +9,10 @@ export {
   CardFooter,
 } from "./card";
 export { Input } from "./input";
+export { Segmented, type SegmentedOption } from "./segmented";
+export { Select } from "./select";
 export { Slider } from "./slider";
+export { Textarea } from "./textarea";
 export { Switch } from "./switch";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 export {

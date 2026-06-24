@@ -2,9 +2,11 @@ import "server-only";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-import type { Database } from "./database.types";
-
-let client: SupabaseClient<Database> | null = null;
+// Note: intentionally untyped. This postgrest-js version's type inference
+// resolves our hand-authored Database generic to `never` for both reads and
+// writes, so the query helpers in lib/queries cast results to the accurate Row
+// types from database.types.ts instead. Keeps writes cast-free and reads typed.
+let client: SupabaseClient | null = null;
 
 /**
  * Server-only Supabase client using the service role key.
@@ -14,7 +16,7 @@ let client: SupabaseClient<Database> | null = null;
  * exposed to the client. `import "server-only"` makes a client-side import a
  * build error. Created lazily so a missing env var fails at use, not at build.
  */
-export function supabaseAdmin(): SupabaseClient<Database> {
+export function supabaseAdmin(): SupabaseClient {
   if (client) return client;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -25,7 +27,7 @@ export function supabaseAdmin(): SupabaseClient<Database> {
     );
   }
 
-  client = createClient<Database>(url, serviceKey, {
+  client = createClient(url, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   return client;

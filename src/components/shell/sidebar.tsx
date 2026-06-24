@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { isActivePath, NAV_SECTIONS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
@@ -64,8 +65,9 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-line p-3">
+      <div className="flex flex-col gap-2 border-t border-line p-3">
         <ThemeToggle />
+        <SignOutButton />
       </div>
     </aside>
   );

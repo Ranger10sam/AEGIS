@@ -2,10 +2,15 @@
  * Hand-authored types mirroring the Supabase schema (CLAUDE.md §3). These drive
  * `createClient<Database>()` so server queries return typed rows.
  *
- * Convention: `Row` is what a SELECT returns; `Insert`/`Update` are permissive
- * (Partial) because most columns carry DB defaults and writes go through the
- * server with snake_case payloads. Postgres remains the source of truth for
- * NOT NULL / check constraints at runtime.
+ * Convention: `Row` is what a SELECT returns. `Insert`/`Update` are permissive
+ * (Partial<Row>) — a single mapped type that the supabase-js write methods
+ * accept cleanly. (An intersection-based "required + optional" Insert resolves
+ * to `never` inside supabase-js's generics, breaking typed writes.) Postgres
+ * stays the source of truth for NOT NULL / check constraints at runtime.
+ *
+ * Timestamp columns (created_at / updated_at / logged_at) are typed non-null:
+ * the migration (build block 6) declares them `NOT NULL DEFAULT now()`, so a
+ * SELECT always returns a value.
  */
 
 export type Json =
@@ -199,7 +204,7 @@ export interface PushSubscription {
 }
 
 // ── Supabase client shape ────────────────────────────────────────────────────
-type TableTypes<Row> = {
+type Table<Row> = {
   Row: Row;
   Insert: Partial<Row>;
   Update: Partial<Row>;
@@ -209,18 +214,18 @@ type TableTypes<Row> = {
 export interface Database {
   public: {
     Tables: {
-      user_config: TableTypes<UserConfig>;
-      spring_concepts: TableTypes<SpringConcept>;
-      dsa_patterns: TableTypes<DsaPattern>;
-      dsa_problems: TableTypes<DsaProblem>;
-      sessions: TableTypes<Session>;
-      stories: TableTypes<Story>;
-      quiz_questions: TableTypes<QuizQuestion>;
-      weekly_reviews: TableTypes<WeeklyReview>;
-      streak: TableTypes<Streak>;
-      ping: TableTypes<Ping>;
-      quick_notes: TableTypes<QuickNote>;
-      push_subscriptions: TableTypes<PushSubscription>;
+      user_config: Table<UserConfig>;
+      spring_concepts: Table<SpringConcept>;
+      dsa_patterns: Table<DsaPattern>;
+      dsa_problems: Table<DsaProblem>;
+      sessions: Table<Session>;
+      stories: Table<Story>;
+      quiz_questions: Table<QuizQuestion>;
+      weekly_reviews: Table<WeeklyReview>;
+      streak: Table<Streak>;
+      ping: Table<Ping>;
+      quick_notes: Table<QuickNote>;
+      push_subscriptions: Table<PushSubscription>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

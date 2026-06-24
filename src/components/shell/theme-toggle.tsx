@@ -4,49 +4,56 @@ import * as React from "react";
 import { useTheme } from "next-themes";
 import { Monitor, Moon, Sun } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { Segmented } from "@/components/ui/segmented";
 
-const OPTIONS = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "system", label: "System", icon: Monitor },
-  { value: "dark", label: "Dark", icon: Moon },
-] as const;
-
-/** Segmented light / system / dark control. */
+/** Segmented light / system / dark control (proper radiogroup semantics). */
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  // Theme is unknown during SSR; wait for mount before showing the active state
-  // to avoid a hydration mismatch (the html class is handled by next-themes).
+  // Theme is unknown during SSR; show the dark default until mounted to avoid a
+  // hydration mismatch and a no-selection flash (the html class is next-themes').
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
+  const value = (mounted && theme) || "dark";
 
   return (
-    <div
-      role="group"
-      aria-label="Theme"
-      className="flex items-center gap-1 rounded-lg border border-line bg-surface p-1"
-    >
-      {OPTIONS.map(({ value, label, icon: Icon }) => {
-        // Pre-mount, highlight the dark default (matches the dark-first <html>)
-        // rather than nothing, then the real choice once next-themes resolves.
-        const current = mounted ? theme : "dark";
-        const active = current === value;
-        return (
-          <button
-            key={value}
-            type="button"
-            onClick={() => setTheme(value)}
-            aria-pressed={active}
-            className={cn(
-              "inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-line-strong",
-              active ? "bg-elevated text-fg" : "text-muted hover:text-fg",
-            )}
-          >
-            <Icon className="size-4 shrink-0" aria-hidden />
-            {label}
-          </button>
-        );
-      })}
-    </div>
+    <Segmented
+      ariaLabel="Theme"
+      variant="contained"
+      className="w-full"
+      value={value}
+      onValueChange={setTheme}
+      options={[
+        {
+          value: "light",
+          title: "Light",
+          label: (
+            <>
+              <Sun className="size-4 shrink-0" aria-hidden />
+              <span className="sr-only">Light</span>
+            </>
+          ),
+        },
+        {
+          value: "system",
+          title: "System",
+          label: (
+            <>
+              <Monitor className="size-4 shrink-0" aria-hidden />
+              <span className="sr-only">System</span>
+            </>
+          ),
+        },
+        {
+          value: "dark",
+          title: "Dark",
+          label: (
+            <>
+              <Moon className="size-4 shrink-0" aria-hidden />
+              <span className="sr-only">Dark</span>
+            </>
+          ),
+        },
+      ]}
+    />
   );
 }
